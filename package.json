@@ -1,0 +1,14 @@
+{
+  "name": "face-detection-api",
+  "version": "1.0.0",
+  "description": "api-server for the face-detection-app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pei-Lun Hsu",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
