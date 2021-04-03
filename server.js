@@ -69,7 +69,7 @@ app.post('/register', (req, res) => {
     // hash/encrypt the password into the hash value (enrypted password)
     bcrypt.hash(password, null, null, function (err, hash) {
         console.log(hash);
-        // store the hashed password into the DB's user profile
+        // store the hashed password into the user's profile in database
     });
 
     // create a new user profile according to the information provided in the database
@@ -77,11 +77,10 @@ app.post('/register', (req, res) => {
         id: '127',
         name: name,
         email: email,
-        password: password,
         entries: 0,
         joined: new Date()
     })
-    // respond the newly registered user profile
+    // respond the newly registered user profile (last entry)
     res.json(tempDatabase.users[tempDatabase.users.length - 1])
 })
 
@@ -115,12 +114,6 @@ app.put('/image', (req, res) => {
     })
     if (!found) res.status(400).json("user not found");
 })
-
-
-bcrypt.hash("bacon", null, null, function (err, hash) {
-    // Store hash in your password DB.
-});
-
 
 // listen on the local port 3000, run the callback for testing
 app.listen(3000, () => {
