@@ -11,7 +11,7 @@ const tempDatabase = {
             id: '125',
             name: 'Henrik',
             email: 'henrik@gmail.com',
-            password: 'phantom',
+            password: '123',
             entries: 0,
             joined: new Date() // create a date object with the time/date when executed
         },
@@ -32,7 +32,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors()); 
 
 // API endpoints:
-
 // response all users' profile (as a list of objects) for checking
 app.get('/', (req, res) => {
     res.send(tempDatabase.users)
@@ -55,7 +54,7 @@ app.post('/signin', (req, res) => {
     // check if the signin info matches a user profile in the database
     if (req.body.email === tempDatabase.users[0].email &&
         req.body.password === tempDatabase.users[0].password) {
-        res.json("success");
+        res.json(tempDatabase.users[0]);
     }
     // respond fail code if no match is found
     else res.status(400).json("signin failed!");
@@ -101,7 +100,6 @@ app.get('/profile/:userId', (req, res) => {
 
 // image route
 app.put('/image', (req, res) => {
-    console.log(req.body);
     const { id } = req.body;
     let found = false;
 
