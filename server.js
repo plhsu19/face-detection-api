@@ -1,6 +1,18 @@
 import express from 'express'
 import bcrypt from 'bcrypt-nodejs'
 import cors from 'cors';
+import knex from 'knex';
+
+// create the client to connect and communicate with the Postgres database
+const pgDatabase = knex({
+    client: 'pg',
+    connection: {
+        host: '127.0.0.1',
+        user: 'peilunhsu',
+        password: '',
+        database: 'object-detect'
+    }
+});
 
 const app = express();
 
@@ -29,7 +41,7 @@ const tempDatabase = {
 // use middleware to parse the json format body in request
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors()); 
+app.use(cors());
 
 // API endpoints:
 // response all users' profile (as a list of objects) for checking
@@ -71,16 +83,19 @@ app.post('/register', (req, res) => {
         // store the hashed password into the user's profile in database
     });
 
-    // create a new user profile according to the information provided in the database
-    tempDatabase.users.push({
-        id: '127',
-        name: name,
-        email: email,
-        entries: 0,
-        joined: new Date()
-    })
-    // respond the newly registered user profile (last entry)
-    res.json(tempDatabase.users[tempDatabase.users.length - 1])
+    // register a user in the DB with infromation from request
+    // respond the newly registered user profile to FE
+    pgDatabase('users')
+        .returning('*')
+        .insert({
+            name: name,
+            email: email,
+            joined: new Date()
+        }).then(user => {
+            res.json(user[0])
+        }).catch(err => { res.status(400).json('Register Failed') })
+        // }).catch(err => { res.status(400).json(err)})
+
 })
 
 
