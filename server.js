@@ -16,6 +16,9 @@ const pgDatabase = knex({
 
 const app = express();
 
+// show the table users in DB before operations
+// pgDatabase.select('*').from('users').then(console.log)
+
 // temporal database object for testing
 const tempDatabase = {
     users: [
@@ -94,38 +97,42 @@ app.post('/register', (req, res) => {
         }).then(user => {
             res.json(user[0])
         }).catch(err => { res.status(400).json('Register Failed') })
-        // }).catch(err => { res.status(400).json(err)})
+    // }).catch(err => { res.status(400).json(err)})
 
 })
 
 
 // profile route
-// use .../:parameter to extract the varying parameter value in the path
-app.get('/profile/:userId', (req, res) => {
-    const id = req.params.userId; // the varaible userId in params is a string
-    let found = false;
-    tempDatabase.users.forEach(user => {
-        if (id === user.id) {
-            found = true;
-            res.json(user);
-        }
-    })
-    if (!found) res.status(400).json("user not found");
+// use path.../:parameter to extract the varying parameter value in the path
+app.get('/profile/:id', (req, res) => {
+    const { id } = req.params; // the varaible id in params is a string for "user's id"
+    // const id = req.params.id;
+
+    // select the rows in table whose field id equals id
+    pgDatabase.select('*').from('users').where({ id: id })
+        .then(
+            user => {
+                if (user.length) res.json(user[0]);
+                else res.json('No user found')
+            })
+        .catch(err => { res.status(400).json('error getting user profile') })
 })
 
 // image route
+// update/increase the entries in user's profile after detection succeed.
+// response with the updated entries (to FE)
 app.put('/image', (req, res) => {
     const { id } = req.body;
-    let found = false;
 
-    tempDatabase.users.forEach(user => {
-        if (id === user.id) {
-            found = true;
-            user.entries += 1;
-            res.json(user.entries);
-        }
+    pgDatabase('users').where('id', '=', id)
+    .increment('entries', 1)
+    .returning('entries')
+    .then(
+        entries => {
+        if (entries.length) res.json(entries[0]);
+        else res.json('user not found')
     })
-    if (!found) res.status(400).json("user not found");
+    .catch(err => {res.status(400).json('unable to update entries')})
 })
 
 // listen on the local port 3000, run the callback for testing
