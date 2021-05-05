@@ -81,23 +81,39 @@ app.post('/register', (req, res) => {
     const { name, email, password } = req.body;
 
     // hash/encrypt the password into the hash value (enrypted password)
-    bcrypt.hash(password, null, null, function (err, hash) {
-        console.log(hash);
-        // store the hashed password into the user's profile in database
-    });
+    const hash = bcrypt.hashSync(password);
 
-    // register a user in the DB with infromation from request
-    // respond the newly registered user profile to FE
-    pgDatabase('users')
-        .returning('*')
-        .insert({
-            name: name,
+    // register a user in the DB (users, login) with infromation from request
+    // respond with the newly registered user profile to FE App
+    // use transaction to bond the both "insert" action
+    pgDatabase.transaction(trx => {
+        // insert the info into login table using trx (transaction)
+        trx.insert({
             email: email,
-            joined: new Date()
-        }).then(user => {
-            res.json(user[0])
-        }).catch(err => { res.status(400).json('Register Failed') })
-    // }).catch(err => { res.status(400).json(err)})
+            hash: hash
+        })
+            .into('login')
+            .returning('email')
+            // insert the user info into users table also using trx
+            .then(loginEmail => {
+                return trx.insert({ // Q: do I need to return trx.... here? what the purpose
+                    name: name,
+                    email: loginEmail[0],
+                    joined: new Date()
+                })
+                    .into('users')
+                    .returning('*')
+                    .then(user => {
+                        res.json(user[0]);
+                    })
+            })
+            .then(result => console.log(result))
+            .then(trx.commit)
+            .catch(trx.rollback) // rollback to the states that all queries were not exeuted
+
+    })
+        .catch(err => res.status(400).json("register failed"))
+    // end transaction
 
 })
 
@@ -125,14 +141,14 @@ app.put('/image', (req, res) => {
     const { id } = req.body;
 
     pgDatabase('users').where('id', '=', id)
-    .increment('entries', 1)
-    .returning('entries')
-    .then(
-        entries => {
-        if (entries.length) res.json(entries[0]);
-        else res.json('user not found')
-    })
-    .catch(err => {res.status(400).json('unable to update entries')})
+        .increment('entries', 1)
+        .returning('entries')
+        .then(
+            entries => {
+                if (entries.length) res.json(entries[0]);
+                else res.json('user not found')
+            })
+        .catch(err => { res.status(400).json('unable to update entries') })
 })
 
 // listen on the local port 3000, run the callback for testing
