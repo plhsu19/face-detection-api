@@ -19,60 +19,53 @@ const app = express();
 // show the table users in DB before operations
 // pgDatabase.select('*').from('users').then(console.log)
 
-// temporal database object for testing
-const tempDatabase = {
-    users: [
-        {
-            id: '125',
-            name: 'Henrik',
-            email: 'henrik@gmail.com',
-            password: '123',
-            entries: 0,
-            joined: new Date() // create a date object with the time/date when executed
-        },
-        {
-            id: '126',
-            name: 'Mario',
-            email: 'mario@gmail.com',
-            password: 'sugar',
-            entries: 0,
-            joined: new Date()
-        }
-    ]
-}
-
 // use middleware to parse the json format body in request
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 // API endpoints:
-// response all users' profile (as a list of objects) for checking
+// route only for testing: response all users' profile (as a list of objects) for checking
 app.get('/', (req, res) => {
-    res.send(tempDatabase.users)
+    pgDatabase.select('*')
+        .from('users')
+        .then(users => {
+            res.json(users);
+        })
 })
 
 // signin route
 app.post('/signin', (req, res) => {
+    const { email, password } = req.body;
 
-    // Load hash from your password DB, and compare the hash with the provieded uninstall password
-    // bcrypt.compare("redwine", '$2a$10$4mwt/YP3IMIMRLmMZEn25eJ5xemDfZqSQEGeN/x4JIuOL/PJdSY0K', function (err, res) {
-    //     // res = true
-    //     console.log('the first guess:', res )
-    // });
-    // bcrypt.compare("whitewine", '$2a$10$4mwt/YP3IMIMRLmMZEn25eJ5xemDfZqSQEGeN/x4JIuOL/PJdSY0K', function (err, res) {
-    //     // res = false
-    //     console.log('the second guess:', res )
-
-    // });
-
-    // check if the signin info matches a user profile in the database
-    if (req.body.email === tempDatabase.users[0].email &&
-        req.body.password === tempDatabase.users[0].password) {
-        res.json(tempDatabase.users[0]);
-    }
-    // respond fail code if no match is found
-    else res.status(400).json("signin failed!");
+    // check if the signin info matches a user's login information in the database
+    pgDatabase.select('email', 'hash')
+        .from('login')
+        .where('email', '=', email)
+        .then(data => {
+            // when provided email exists in database's login table
+            if (data.length) {
+                // compare the provided password with the hash in database
+                const isValid = bcrypt.compareSync(password, data[0].hash);
+                if (isValid) {
+                    // always return the database promise within then()
+                    return pgDatabase.select('*')
+                        .from('users')
+                        .where('email', '=', email)
+                        .then(user => { res.json(user[0]) })
+                        .catch(err => { res.status(400).json('unable to access user profile')})
+                }
+                // password not match
+                else {
+                    res.status(400).json('wrong credentials!')
+                }
+            }
+            // when provided email doesn't exist in database's login table
+            else {
+                res.status(400).json('wrong credentials!');
+            }
+        })
+        .catch(err => { res.status(400).json('system or database failed.') })
 })
 
 // register route
@@ -96,7 +89,8 @@ app.post('/register', (req, res) => {
             .returning('email')
             // insert the user info into users table also using trx
             .then(loginEmail => {
-                return trx.insert({ // Q: do I need to return trx.... here? what the purpose
+                return trx.insert({ // Q: do I need to return trx.... here? what the purpose 
+                    // A: always returns to let database know about the status
                     name: name,
                     email: loginEmail[0],
                     joined: new Date()
