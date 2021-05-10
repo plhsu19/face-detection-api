@@ -1,4 +1,6 @@
-export const handleRegister = (req, res, bcrypt, pgDatabase) => {
+// demostrate advanced function that return with another function
+// to clean things up
+export const handleRegister = (bcrypt, pgDatabase) => (req, res) => {
     // deconstruct the body object in request
     const { name, email, password } = req.body;
 

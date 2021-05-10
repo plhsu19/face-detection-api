@@ -44,16 +44,16 @@ app.get('/', (req, res) => {
 // signin route
 app.post('/signin', (req, res) => { handleSignin(req, res, bcrypt, pgDatabase) })
 
-// register route
-app.post('/register', (req, res) => { handleRegister(req, res, bcrypt, pgDatabase) })
+// register route (clean form)
+app.post('/register', handleRegister(bcrypt, pgDatabase))
 
 // profile route
 // use path.../:parameter to extract the varying parameter value in the path
 app.get('/profile/:id', (req, res) => { handleProfileGet(req, res, pgDatabase) })
 
 // image route
-// update/increase the entries in user's profile after detection succeed.
-// response with the updated entries (to FE)
+// updates the entries in user's profile after detection succeed.
+// responds the updated entries (to FE App)
 app.put('/image', (req, res) => { handleImage(req, res, pgDatabase) })
 
 // listen on the local port 3000, run the callback for testing
