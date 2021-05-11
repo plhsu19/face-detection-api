@@ -5,7 +5,7 @@ import knex from 'knex';
 import {handleRegister} from './controllers/register.js';
 import {handleSignin} from './controllers/signin.js';
 import handleProfileGet from './controllers/profile.js'
-import handleImage from './controllers/image.js'
+import {handleImage, handleApiCall} from './controllers/image.js'
 
 
 // create the client to connect and communicate with the Postgres database
@@ -20,6 +20,7 @@ const pgDatabase = knex({
 });
 
 const app = express();
+const PORT = process.env.PORT
 
 // show the table users in DB before operations
 // pgDatabase.select('*').from('users').then(console.log)
@@ -51,14 +52,18 @@ app.post('/register', handleRegister(bcrypt, pgDatabase))
 // use path.../:parameter to extract the varying parameter value in the path
 app.get('/profile/:id', (req, res) => { handleProfileGet(req, res, pgDatabase) })
 
+// imageurl
+// the route that accesses the clarifai public api
+app.post('/imageurl', (req, res) => { handleApiCall(req, res) })
+
 // image route
 // updates the entries in user's profile after detection succeed.
 // responds the updated entries (to FE App)
 app.put('/image', (req, res) => { handleImage(req, res, pgDatabase) })
 
 // listen on the local port 3000, run the callback for testing
-app.listen(3000, () => {
-    console.log('the server is running on local:3000');
+app.listen(PORT, () => {
+    console.log(`the server is running on local: ${PORT}`);
 });
 
 

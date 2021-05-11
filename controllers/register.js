@@ -3,6 +3,10 @@
 export const handleRegister = (bcrypt, pgDatabase) => (req, res) => {
     // deconstruct the body object in request
     const { name, email, password } = req.body;
+    
+    if (!name || !email || !password) {
+        return res.status(400).json("register information cannot be empty")
+    }
 
     // hash/encrypt the password into the hash value (enrypted password)
     const hash = bcrypt.hashSync(password);

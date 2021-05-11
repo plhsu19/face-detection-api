@@ -1,6 +1,9 @@
 export const handleSignin = (req, res, bcrypt, pgDatabase) => {
     const { email, password } = req.body;
-    console.log(password)
+    
+    if ( !email || !password) {
+        return res.status(400).json("empty credentials")
+    }
 
     // check if the signin info matches a user's login information in the database
     pgDatabase.select('email', 'hash')
