@@ -36,13 +36,18 @@ app.use(cors());
 
 //root route
 // only for testing: response all users' profile (as a list of objects) for checking
+// app.get('/', (req, res) => {
+//     pgDatabase.select('*')
+//         .from('users')
+//         .then(users => {
+//             res.json(users);
+//         })
+// })
+
 app.get('/', (req, res) => {
-    pgDatabase.select('*')
-        .from('users')
-        .then(users => {
-            res.json(users);
-        })
+    res.json('the server is working')
 })
+
 
 // signin route
 app.post('/signin', (req, res) => { handleSignin(req, res, bcrypt, pgDatabase) })
@@ -63,7 +68,7 @@ app.post('/imageurl', (req, res) => { handleApiCall(req, res) })
 // responds the updated entries (to FE App)
 app.put('/image', (req, res) => { handleImage(req, res, pgDatabase) })
 
-// listen on the local port 3000, run the callback for testing
+// listen on the port set in the env varaible by the remote server, run the callback for testing
 app.listen(PORT, () => {
     console.log(`the server is running on local: ${PORT}`);
 });
