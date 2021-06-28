@@ -2,26 +2,26 @@ import express from 'express'
 import bcrypt from 'bcrypt-nodejs'
 import cors from 'cors';
 import knex from 'knex';
-import {handleRegister} from './controllers/register.js';
-import {handleSignin} from './controllers/signin.js';
+import { handleRegister } from './controllers/register.js';
+import { handleSignin } from './controllers/signin.js';
 import handleProfileGet from './controllers/profile.js'
-import {handleImage, handleApiCall} from './controllers/image.js'
+import { handleImage, handleApiCall } from './controllers/image.js'
 
+// const PORT = 3000; // for fixed port
+const PORT = process.env.PORT // for dynamic port assignment by PaaS server (env variable)
 
 // create the client to connect and communicate with the Postgres database
 const pgDatabase = knex({
     client: 'pg',
     connection: {
-        host: '127.0.0.1',
-        user: 'peilunhsu',
-        password: '',
-        database: 'object-detect'
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
     }
 });
 
 const app = express();
-// const PORT = 3000; // for fixed port
-const PORT = process.env.PORT // for dynamic port assignment by PaaS server (env variable)
 
 
 // show the table users in DB before operations
