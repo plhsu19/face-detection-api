@@ -20,7 +20,9 @@ const pgDatabase = knex({
 });
 
 const app = express();
-const PORT = process.env.PORT
+const PORT = 3000;
+// const PORT = process.env.PORT
+
 
 // show the table users in DB before operations
 // pgDatabase.select('*').from('users').then(console.log)
