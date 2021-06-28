@@ -20,8 +20,8 @@ const pgDatabase = knex({
 });
 
 const app = express();
-const PORT = 3000;
-// const PORT = process.env.PORT
+// const PORT = 3000; // for fixed port
+const PORT = process.env.PORT // for dynamic port assignment by PaaS server (env variable)
 
 
 // show the table users in DB before operations
