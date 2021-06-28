@@ -36,18 +36,13 @@ app.use(cors());
 
 //root route
 // only for testing: response all users' profile (as a list of objects) for checking
-// app.get('/', (req, res) => {
-//     pgDatabase.select('*')
-//         .from('users')
-//         .then(users => {
-//             res.json(users);
-//         })
-// })
-
 app.get('/', (req, res) => {
-    res.json('the server is working')
+    pgDatabase.select('*')
+        .from('users')
+        .then(users => {
+            res.json(users);
+        })
 })
-
 
 // signin route
 app.post('/signin', (req, res) => { handleSignin(req, res, bcrypt, pgDatabase) })
