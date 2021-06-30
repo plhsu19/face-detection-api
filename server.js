@@ -76,7 +76,7 @@ app.put('/image', (req, res) => { handleImage(req, res, pgDatabase) })
 
 // listen on the port set in the env varaible by the remote server, run the callback for testing
 app.listen(PORT, () => {
-    console.log(`the server is running on local: ${PORT}`);
+    console.log(`the server is running on port: ${PORT}`);
 });
 
 
