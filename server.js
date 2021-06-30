@@ -7,30 +7,30 @@ import { handleSignin } from './controllers/signin.js';
 import handleProfileGet from './controllers/profile.js'
 import { handleImage, handleApiCall } from './controllers/image.js'
 
-const PORT = 3000; // for local fixed port
-// const PORT = process.env.PORT // for dynamic port assignment by PaaS server (env variable)
+// const PORT = 3000; // for local fixed port
+const PORT = process.env.PORT // for dynamic port assignment by PaaS server (env variable)
 
 // create the client to connect and communicate with the reomte Postgres database
-// const pgDatabase = knex({
-//     client: 'pg',
-//     connection: {
-//         connectionString: process.env.DATABASE_URL,
-//         ssl: {
-//             rejectUnauthorized: false
-//         }
-//     }
-// });
-
-// connect to local database
 const pgDatabase = knex({
     client: 'pg',
     connection: {
-        host: '127.0.0.1',
-        user: 'peilunhsu',
-        password: '',
-        database: 'object-detect'
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
     }
 });
+
+// connect to local database
+// const pgDatabase = knex({
+//     client: 'pg',
+//     connection: {
+//         host: '127.0.0.1',
+//         user: 'peilunhsu',
+//         password: '',
+//         database: 'object-detect'
+//     }
+// });
 
 const app = express();
 
